@@ -4,7 +4,7 @@ import {toast} from 'react-hot-toast';
 import  axios  from 'axios';
 import { UserContext } from "./UserContext";
 
-const api = "http://localhost:3000"
+const api ="https://t-resumeqi-ai.onrender.com";
 const Userprovider = ({children}) => {
       const navigate = useNavigate();
   const [show, setShow] = useState(false);
@@ -68,10 +68,9 @@ const Userprovider = ({children}) => {
         toast.error("Something went wrong");
       } else {
         toast.success("otp sent successfully");
-         navigate("/verify-otp"), {
+     navigate("/verify-otp", {
       state: { email: form.email }
-      }
-    
+      });    
       }
     }catch(error){
       toast.error(error.response?.data?.message || "Unable to register");
@@ -131,7 +130,7 @@ const Userprovider = ({children}) => {
       toast.error("Please fill all the fields");
       return;
     }
-    if (!/\S+@\S+\.\S+/.test(email)) {
+    if (/^\S+@\S+\.\S+$/.test(email)) {
       toast.error("Please enter a valid email");
       return;
     }
