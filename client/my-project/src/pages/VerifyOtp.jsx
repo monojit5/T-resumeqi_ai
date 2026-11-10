@@ -8,7 +8,7 @@ import { UserContext } from "../context/UserContext";
 function VerifyOtp() {
   const location = useLocation();
   const email = location.state?.email || "your email";
-  const { handleChanges, handleSubmits, otp, refs } = useContext(UserContext);
+  const { handleChanges, handleSubmits, handleResendOtp, resendingOtp, otp, refs } = useContext(UserContext);
   return (
     <AuthShell>
 
@@ -53,8 +53,8 @@ function VerifyOtp() {
 
       <p className="resend">
         Didn't receive the code?
-        <button type="button" onClick={() => alert("Connect resend OTP API")}>
-          Resend OTP
+        <button type="button" onClick={handleResendOtp} disabled={resendingOtp}>
+          {resendingOtp ? "Sending…" : "Resend OTP"}
         </button>
       </p>
 

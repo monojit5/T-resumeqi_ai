@@ -1,9 +1,9 @@
 import { FileCheck2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-function Brand() {
+function Brand({ onClick, className = "" }) {
   return (
-    <Link to="/" className="brand">
+    <Link to="/" className={`brand${className ? ` ${className}` : ""}`} onClick={onClick}>
       <span className="brand-icon">
         <FileCheck2 size={21} strokeWidth={2.2} />
       </span>

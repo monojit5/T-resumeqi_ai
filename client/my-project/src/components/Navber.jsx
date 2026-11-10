@@ -1,13 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronDown, Heart, LogOut, Menu, Moon, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useContext } from "react";
 import Brand from "./Brand";
 import { UserContext } from "../context/UserContext";
+import { SubscriptionContext } from "../context/SubscriptionContext";
+import "./Navber.css";
 
 const Navber = () => {
   const { auth, handleLogout } = useContext(UserContext);
+  const { isPremium, subscription } = useContext(SubscriptionContext);
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
@@ -46,16 +50,19 @@ const Navber = () => {
     : "U";
 
   const closeMenu = () => setMenuOpen(false);
+  const journeyPath = auth?.token ? "/resume-builder" : "/login";
+  const journeyState = auth?.token ? undefined : { from: { pathname: "/resume-builder" } };
+  const isActive = (path) => location.pathname === path;
 
   return (
     <motion.nav
       ref={navRef}
-      className="navbar"
+      className="navbar nav-modern"
       initial={{ opacity: 0, y: -35 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
     >
-      <Brand />
+      <Brand className="nav-brand-link" onClick={closeMenu} />
 
       <button
         className="nav-menu-toggle"
@@ -68,14 +75,22 @@ const Navber = () => {
         {menuOpen ? <X size={22} /> : <Menu size={22} />}
       </button>
 
-      <div id="primary-navigation" className={`nav-links${menuOpen ? " is-open" : ""}`}>
-        <Link to="/features" onClick={closeMenu}>Features</Link>
-        <Link to="/resume-check" onClick={closeMenu}>Resume ATS</Link>
-        <Link to="/how-it-works" onClick={closeMenu}>How it works</Link>
-        <Link to="/about" onClick={closeMenu}>About</Link>
+      <div id="primary-navigation" className={`nav-links nav-modern-links${menuOpen ? " is-open" : ""}`}>
+        <Link className={isActive("/") ? "is-active" : ""} to="/" onClick={closeMenu} aria-current={isActive("/") ? "page" : undefined}>Home</Link>
+        <Link className={isActive("/features") ? "is-active" : ""} to="/features" onClick={closeMenu} aria-current={isActive("/features") ? "page" : undefined}>Features</Link>
+        <Link className={isActive("/about") ? "is-active" : ""} to="/about" onClick={closeMenu} aria-current={isActive("/about") ? "page" : undefined}>About</Link>
       </div>
 
       <div className="nav-buttons">
+        <Link
+          to={journeyPath}
+          state={journeyState}
+          className="primary-btn nav-signup nav-modern-cta"
+          aria-label={auth?.token ? "Go to Resume Builder" : "Get Started"}
+          onClick={closeMenu}
+        >
+          <span>{auth?.token ? "Go to Resume Builder" : "Get Started"}</span> <ArrowRight size={16} />
+        </Link>
         {auth ? (
           <div className="user-menu">
             <button
@@ -93,6 +108,14 @@ const Navber = () => {
             {dropdownOpen && (
               <div className="user-dropdown" role="menu">
                 <div className="dropdown-user-name">{auth.name}</div>
+                <span className={`dropdown-plan-badge${isPremium ? " premium" : ""}`}>
+                  {isPremium ? "PREMIUM" : "FREE"} PLAN
+                </span>
+                {isPremium && subscription?.expiresAt && (
+                  <div className="dropdown-plan-expiry">
+                    Expires {new Date(subscription.expiresAt).toLocaleDateString()}
+                  </div>
+                )}
                 <div className="dropdown-theme-options" aria-label="Color theme">
                   <button
                     className={theme === "light" ? "selected" : ""}
@@ -124,16 +147,7 @@ const Navber = () => {
               </div>
             )}
           </div>
-        ) : (
-          <>
-            <Link to="/login" className="login-btn" onClick={closeMenu}>
-              Login
-            </Link>
-            <Link to="/register" className="primary-btn nav-signup" onClick={closeMenu}>
-              Sign Up <ArrowRight size={16} />
-            </Link>
-          </>
-        )}
+        ) : null}
       </div>
     </motion.nav>
   );

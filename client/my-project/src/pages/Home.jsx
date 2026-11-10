@@ -12,9 +12,11 @@ import {
 } from "lucide-react";
 
 import { Link } from "react-router-dom";
+import { useContext } from "react";
 import Brand from "../components/Brand";
 import HowItWorks from "../components/HowItWorks";
 import Navber from "../components/Navber";
+import { UserContext } from "../context/UserContext";
 
 
 const features = [
@@ -51,9 +53,37 @@ const stagger = {
   },
 };
 
+const girlModeHearts = Array.from({ length: 18 }, (_, index) => ({
+  left: `${(index * 53) % 100}%`,
+  duration: `${8 + (index % 5)}s`,
+  delay: `${-((index * 1.7) % 7)}s`,
+  size: `${14 + (index % 4) * 6}px`,
+  drift: `${((index % 5) - 2) * 3}vw`,
+}));
+
 function Home() {
+  const { auth } = useContext(UserContext);
+  const journeyPath = auth?.token ? "/resume-builder" : "/login";
+  const journeyState = auth?.token ? undefined : { from: { pathname: "/resume-builder" } };
+
   return (
     <div className="home">
+      <div className="girl-mode-rain" aria-hidden="true">
+        {girlModeHearts.map((heart, index) => (
+          <span
+            key={index}
+            style={{
+              left: heart.left,
+              animationDuration: heart.duration,
+              animationDelay: heart.delay,
+              fontSize: heart.size,
+              "--heart-drift": heart.drift,
+            }}
+          >
+            ♥
+          </span>
+        ))}
+      </div>
 
     <Navber/>
     
@@ -313,7 +343,7 @@ function Home() {
             better career opportunities with intelligent tools.
           </p>
 
-          <Link to="/register" className="primary-btn big-btn">
+          <Link to={journeyPath} state={journeyState} className="primary-btn big-btn">
             Start Your Journey <ArrowRight size={17} />
           </Link>
         </motion.div>

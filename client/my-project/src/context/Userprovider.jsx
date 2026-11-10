@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {toast} from 'react-hot-toast';
 import  axios  from 'axios';
 import { UserContext } from "./UserContext";
+import API_URL from "../config/api";
 
-const api ="https://t-resumeqi-ai.onrender.com";
 const Userprovider = ({children}) => {
       const navigate = useNavigate();
   const [show, setShow] = useState(false);
@@ -63,14 +63,14 @@ const Userprovider = ({children}) => {
     }
     
     try{
-      const responce = await axios.post(`${api}/user/register`, form);
+      const responce = await axios.post(`${API_URL}/user/register`, form);
       if(responce.status !== 201){
         toast.error("Something went wrong");
       } else {
         toast.success("otp sent successfully");
-     navigate("/verify-otp", {
-      state: { email: form.email }
-      });    
+        navigate("/verify-otp", {
+          state: { email: form.email, from: location.state?.from }
+        });
       }
     }catch(error){
       toast.error(error.response?.data?.message || "Unable to register");
@@ -79,6 +79,7 @@ const Userprovider = ({children}) => {
   };
 
   const [otp, setOtp] = useState(["","","","","",""]);
+  const [resendingOtp, setResendingOtp] = useState(false);
   const refs = useRef([]);
   const location = useLocation();
   
@@ -97,6 +98,26 @@ const Userprovider = ({children}) => {
     }
   };
 
+  const handleResendOtp = async () => {
+    if (!verificationEmail) {
+      toast.error("Please register before requesting a new verification code");
+      navigate("/register");
+      return;
+    }
+    if (resendingOtp) return;
+
+    setResendingOtp(true);
+    try {
+      await axios.post(`${API_URL}/user/resend-otp`, { email: verificationEmail });
+      setOtp(["", "", "", "", "", ""]);
+      toast.success("A new verification code has been sent");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Unable to resend verification code");
+    } finally {
+      setResendingOtp(false);
+    }
+  };
+
   const handleSubmits = async (e) => {
     e.preventDefault();
 
@@ -110,12 +131,12 @@ const Userprovider = ({children}) => {
       return;
     }
     try{
-      await axios.post(`${api}/user/verify-otp`, {
+      await axios.post(`${API_URL}/user/verify-otp`, {
         email: verificationEmail,
         otp: otp.join("")
       });
       toast.success("OTP verified successfully");
-      navigate("/login");
+      navigate("/login", { state: { from: location.state?.from } });
     }catch(error){
       toast.error(error.response?.data?.message || "Unable to verify OTP");
     }
@@ -130,7 +151,7 @@ const Userprovider = ({children}) => {
       toast.error("Please fill all the fields");
       return;
     }
-    if (/^\S+@\S+\.\S+$/.test(email)) {
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
       toast.error("Please enter a valid email");
       return;
     }
@@ -140,7 +161,7 @@ const Userprovider = ({children}) => {
     }
     
     try{
-      const response = await axios.post(`${api}/user/login`, { email, password });
+      const response = await axios.post(`${API_URL}/user/login`, { email, password });
       const { user, token } = response.data.data;
       const authData = {
         name: user.name,
@@ -189,6 +210,8 @@ const Userprovider = ({children}) => {
         setShow,
         handleChanges,
         handleSubmits,
+        handleResendOtp,
+        resendingOtp,
         otp,
         refs,
         email,

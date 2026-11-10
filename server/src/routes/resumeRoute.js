@@ -1,6 +1,16 @@
 import express from 'express';
 import multer from 'multer';
 import { analyzeUploadedResume } from '../controllers/resumeController.js';
+import {
+    createResume,
+    deleteResume,
+    getResume,
+    listResumes,
+    updateResume,
+} from '../controllers/resumeBuilderController.js';
+import {
+    downloadResume,
+} from '../controllers/resumeDownloadController.js';
 import { userAuth } from '../middlewares/userMiddleware.js';
 
 export const resumeRouter = express.Router();
@@ -30,3 +40,10 @@ const uploadResume = (req, res, next) => {
 };
 
 resumeRouter.post('/analyze', userAuth, uploadResume, analyzeUploadedResume);
+resumeRouter.use(userAuth);
+resumeRouter.get('/', listResumes);
+resumeRouter.post('/', createResume);
+resumeRouter.get('/:id', getResume);
+resumeRouter.put('/:id', updateResume);
+resumeRouter.delete('/:id', deleteResume);
+resumeRouter.get('/:id/download', downloadResume);

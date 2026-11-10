@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -28,6 +28,7 @@ import Brand from "../components/Brand";
 import Navber from "../components/Navber";
 import TanujaChatbot from "../components/TanujaChatbot";
 import ResumeRewriteReveal from "../components/ResumeRewriteReveal";
+import { SubscriptionContext } from "../context/SubscriptionContext";
 
 const SCORE_COLORS = ["#ec79a6", "#b77aba", "#e7a36f", "#83b9aa"];
 
@@ -51,6 +52,7 @@ function ScoreCard({ label, score, icon: Icon, tone }) {
 
 function ResumeDashboard() {
   const location = useLocation();
+  const { isPremium, plan } = useContext(SubscriptionContext);
   const [showResumeReveal, setShowResumeReveal] = useState(false);
   const storedResult = useMemo(() => {
     if (location.state?.analysis) return location.state;
@@ -87,6 +89,9 @@ function ResumeDashboard() {
             <span className="resume-eyebrow"><Sparkles size={15} /> YOUR RESUME SNAPSHOT</span>
             <h1>Your resume, <span>decoded.</span></h1>
             <p>A practical snapshot of your ATS readiness and resume quality.</p>
+            <Link to="/pricing" className={`analysis-plan-badge${isPremium ? " premium" : ""}`}>
+              {isPremium ? "PREMIUM PLAN · UNLIMITED AI" : `FREE PLAN · ${plan.monthlyAiLimit} AI ANALYSES/MONTH`}
+            </Link>
           </div>
           <div className="analysis-file-chip">
             <FileText size={17} />

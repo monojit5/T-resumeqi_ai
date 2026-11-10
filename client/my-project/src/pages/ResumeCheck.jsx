@@ -8,17 +8,21 @@ import Brand from "../components/Brand";
 import Navber from "../components/Navber";
 import { useContext } from "react";
 import { UserContext } from "../context/UserContext";
+import { SubscriptionContext } from "../context/SubscriptionContext";
+import { Link } from "react-router-dom";
+import API_URL from "../config/api";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const API_URL = "http://localhost:3000";
 
 function ResumeCheck() {
   const { auth, handleSessionExpired } = useContext(UserContext);
+  const { isPremium, plan, usage, loadSubscription } = useContext(SubscriptionContext);
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const canAnalyze = isPremium || usage.aiAnalysesUsed < plan.monthlyAiLimit;
 
   const chooseFile = (candidate) => {
     if (!candidate) return;
@@ -49,6 +53,10 @@ function ResumeCheck() {
       toast.error("Upload your resume PDF first.");
       return;
     }
+    if (!canAnalyze) {
+      toast.error("You have reached the Free plan's monthly AI analysis limit.");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("resume", file);
@@ -66,6 +74,7 @@ function ResumeCheck() {
         fileName: file.name,
         analyzedAt: new Date().toISOString(),
       };
+      await loadSubscription();
       sessionStorage.setItem("resumeAnalysis", JSON.stringify(result));
       navigate("/resume-dashboard", { state: result });
     } catch (error) {
@@ -98,6 +107,11 @@ function ResumeCheck() {
           <div className="resume-upload-points">
             <span><FileCheck2 size={17} /> Clear, actionable feedback</span>
             <span><LockKeyhole size={17} /> Your PDF is processed for this analysis only</span>
+          </div>
+          <div className={`resume-plan-status${isPremium ? " premium" : ""}`}>
+            <strong>{isPremium ? "PREMIUM PLAN" : "FREE PLAN"}</strong>
+            <span>{isPremium ? "Unlimited AI resume analysis" : `${usage.aiAnalysesUsed}/${plan.monthlyAiLimit} AI analyses used this month`}</span>
+            {!isPremium && <Link to="/pricing">Upgrade for unlimited AI</Link>}
           </div>
         </motion.div>
 
@@ -162,11 +176,11 @@ function ResumeCheck() {
             </button>
           )}
 
-          <button className="primary-btn resume-analyze-button" type="submit" disabled={analyzing}>
+          <button className="primary-btn resume-analyze-button" type="submit" disabled={analyzing || !canAnalyze}>
             {analyzing ? (
               <><span className="resume-loading-spinner" /> Reading your resume…</>
             ) : (
-              <>Analyze my resume <Sparkles size={17} /></>
+              <>{canAnalyze ? "Analyze my resume" : "Monthly limit reached"} <Sparkles size={17} /></>
             )}
           </button>
           <p className="resume-privacy-note">

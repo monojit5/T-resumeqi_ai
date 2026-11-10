@@ -83,6 +83,36 @@ const resumeSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    name: {
+        type: String,
+        default: "",
+        trim: true,
+        maxlength: 100
+    },
+    email: {
+        type: String,
+        default: "",
+        trim: true,
+        lowercase: true,
+        maxlength: 254
+    },
+    headline: {
+        type: String,
+        default: "",
+        trim: true,
+        maxlength: 120
+    },
+    template: {
+        type: String,
+        enum: ['classic', 'modern', 'compact'],
+        default: 'classic'
+    },
+    title: {
+        type: String,
+        default: "My resume",
+        trim: true,
+        maxlength: 100
+    },
 
     phone: {
         type: String,

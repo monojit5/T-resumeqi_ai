@@ -1,7 +1,7 @@
 
 import './App.css'
 import './index.css'
-import { lazy, Suspense, useContext } from "react";
+import { lazy, Suspense, useContext, useEffect } from "react";
 import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import Home from './pages/Home';
 import Register from './pages/Register';
@@ -14,6 +14,10 @@ import { UserContext } from './context/UserContext';
 
 const ResumeCheck = lazy(() => import('./pages/ResumeCheck'));
 const ResumeDashboard = lazy(() => import('./pages/ResumeDashboard'));
+const ResumeBuilder = lazy(() => import('./pages/ResumeBuilder'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const DemoCheckout = lazy(() => import('./pages/DemoCheckout'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 function RequireAuth({ children }) {
   const { auth } = useContext(UserContext);
@@ -25,7 +29,10 @@ function RequireAuth({ children }) {
 }
 
 function App() {
-  
+  useEffect(() => {
+    const theme = localStorage.getItem("theme") === "light" ? "light" : "dark";
+    document.documentElement.dataset.theme = theme;
+  }, []);
 
   return (
     <>
@@ -37,12 +44,33 @@ function App() {
         <Route path="/features" element={<Features />} />
         <Route path="/how-it-works" element={<HowToWork />} />
         <Route path="/about" element={<About />} />
+        <Route path="/pricing" element={<Suspense fallback={<div className="page-loading">Loading pricing…</div>}><Pricing /></Suspense>} />
+        <Route
+          path="/demo-checkout"
+          element={
+            <RequireAuth>
+              <Suspense fallback={<div className="page-loading">Loading demo checkout…</div>}>
+                <DemoCheckout />
+              </Suspense>
+            </RequireAuth>
+          }
+        />
         <Route
           path="/resume-check"
           element={
             <RequireAuth>
               <Suspense fallback={<div className="page-loading">Loading resume tools…</div>}>
                 <ResumeCheck />
+              </Suspense>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/resume-builder"
+          element={
+            <RequireAuth>
+              <Suspense fallback={<div className="page-loading">Loading your resume workspace…</div>}>
+                <ResumeBuilder />
               </Suspense>
             </RequireAuth>
           }
@@ -57,6 +85,7 @@ function App() {
             </RequireAuth>
           }
         />
+        <Route path="*" element={<Suspense fallback={<div className="page-loading">Finding your page…</div>}><NotFound /></Suspense>} />
       </Routes>
     </>
   )

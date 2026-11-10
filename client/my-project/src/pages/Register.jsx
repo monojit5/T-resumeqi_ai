@@ -1,10 +1,11 @@
 
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import AuthShell from "../components/AuthShell";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useContext } from "react";
 import { UserContext } from "../context/UserContext";
 function Register() {
+  const location = useLocation();
   const { handleChange, handleSubmit, form, show, setShow } = useContext(UserContext);
 
   return (
@@ -74,7 +75,7 @@ function Register() {
         </div>
 
         <label className="terms">
-          <input type="checkbox" required/>
+          <input type="checkbox"/>
           I agree to the Terms & Conditions
         </label>
 
@@ -86,7 +87,7 @@ function Register() {
 
       <p className="auth-bottom">
         Already have an account?
-        <Link to="/login"> Login</Link>
+        <Link to="/login" state={{ from: location.state?.from }}> Login</Link>
       </p>
 
     </AuthShell>

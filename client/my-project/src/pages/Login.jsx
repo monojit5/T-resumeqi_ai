@@ -1,11 +1,12 @@
 import { useContext, useState} from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import AuthShell from "../components/AuthShell";
 import { UserContext } from "../context/UserContext";
 
 function Login() {
     const [show, setShow] = useState(false);
+ const location = useLocation();
  const {handleSubmitsi, email, setEmail, password, setPassword} = useContext(UserContext);
   return (
     <AuthShell>
@@ -29,7 +30,7 @@ function Login() {
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
+            
           />
         </div>
 
@@ -45,7 +46,7 @@ function Login() {
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
+            
           />
 
           <button type="button" onClick={() => setShow(!show)}>
@@ -58,17 +59,9 @@ function Login() {
         </button>
 
       </form>
-
-      <div className="divider">OR CONTINUE WITH</div>
-
-      <div className="social-buttons">
-        <button type="button">Google</button>
-        <button type="button">GitHub</button>
-      </div>
-
       <p className="auth-bottom">
         Don't have an account?
-        <Link to="/register"> Register</Link>
+        <Link to="/register" state={{ from: location.state?.from }}> Register</Link>
       </p>
 
     </AuthShell>
